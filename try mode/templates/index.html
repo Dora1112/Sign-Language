@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image and Video Display</title>
+    <style>
+        .display-area {
+            margin: 20px;
+        }
+        .display-area img, .display-area video {
+            width: 400px;
+            height: 300px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image and Video Display</h1>
+    <form id="predict-form" method="post">
+        <input type="text" id="input_text" name="input_text" placeholder="Enter text" required>
+        <button type="submit">Predict</button>
+    </form>
+    
+  
+    <!-- <img id="predicted-image" src="videos/accept/00597.mp4" alt="Predicted Image"> -->
+    <div class="display-area">
+        <div id="image-container">
+            <img id="predicted-image" src="" alt="Predicted Image">
+        </div>
+        <div id="video-container">
+            <video id="predicted-video" controls>
+                <source id="video-source" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+    <button id="replay-button">Replay</button>
+    <button id="close-button">Close</button>
+
+    <script>
+        document.getElementById('predict-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+
+            fetch('/word', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.image_path) {
+                    document.getElementById('predicted-image').src = data.image_path;
+                } else if (data.image_error) {
+                    document.getElementById('predicted-image').src = '';
+                    alert(data.image_error);
+                }
+                
+                if (data.video_path) {
+                    document.getElementById('video-source').src = data.video_path;
+                    document.getElementById('predicted-video').load();
+                } else if (data.video_error) {
+                    document.getElementById('video-source').src = '';
+                    alert(data.video_error);
+                }
+            });
+        });
+
+        document.getElementById('replay-button').addEventListener('click', function() {
+            let video = document.getElementById('predicted-video');
+            video.currentTime = 0;
+            video.play();
+        });
+
+        document.getElementById('close-button').addEventListener('click', function() {
+            window.close();
+        });
+    </script>
+</body>
+</html>
